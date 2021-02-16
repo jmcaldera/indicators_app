@@ -53,6 +53,8 @@ class LoginViewModel(
     fun onLoginClicked() {
         // view can only call this method if email and password are valid
         viewModelScope.launch {
+            _loading.value = true
+
             val result = authRepository.logIn(
                 request = AuthRepository.AuthRequest(
                     email = email.value!!,
@@ -60,6 +62,7 @@ class LoginViewModel(
                 )
             )
 
+            _loading.value = false
             handleResult(result)
         }
     }

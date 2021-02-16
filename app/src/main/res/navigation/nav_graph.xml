@@ -3,13 +3,23 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/destination_login">
+    app:startDestination="@id/destination_indicators">
 
     <fragment
         android:id="@+id/destination_indicators"
-        android:name="dev.josecaldera.indicators.ui.IndicatorsFragment"
+        android:name="dev.josecaldera.indicators.main.ui.IndicatorsFragment"
         android:label="Indicadores"
         tools:layout="@layout/fragment_indicators">
+
+        <action
+            android:id="@+id/action_indicators_to_indicator_details"
+            app:destination="@id/destination_indicator_details" />
+
+        <action
+            android:id="@+id/action_indicators_to_login"
+            app:destination="@id/destination_login"
+            app:popUpTo="@id/destination_login"
+            app:popUpToInclusive="true" />
 
     </fragment>
 
@@ -24,5 +34,17 @@
             app:destination="@id/destination_indicators"
             app:popUpTo="@id/destination_indicators"
             app:popUpToInclusive="true" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/destination_indicator_details"
+        android:name="dev.josecaldera.indicators.details.IndicatorDetailsFragment"
+        android:label="Detalles"
+        tools:layout="@layout/fragment_indicator_details">
+
+        <argument
+            android:name="indicator"
+            app:argType="dev.josecaldera.indicators.args.IndicatorArg"
+            app:nullable="false" />
     </fragment>
 </navigation>

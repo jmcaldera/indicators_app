@@ -22,7 +22,6 @@ class LocalAuthRepository(
     override suspend fun logIn(request: AuthRepository.AuthRequest): Result<User> {
         // remote operations should be performed on a background thread
         return withContext(ioDispatcher) {
-            delay(1000)
             authApi.logIn(request.email, request.password)
                 .onSuccess {
                     // Save to prefs

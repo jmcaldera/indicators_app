@@ -1,0 +1,103 @@
+package dev.josecaldera.indicators.main.ui
+
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.core.os.bundleOf
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.snackbar.Snackbar
+import dev.josecaldera.indicators.R
+import dev.josecaldera.indicators.args.toParcelable
+import dev.josecaldera.indicators.databinding.FragmentIndicatorsBinding
+import dev.josecaldera.indicators.details.IndicatorDetailsFragment
+import dev.josecaldera.indicators.main.ui.adapter.IndicatorsAdapter
+import kotlinx.coroutines.flow.collect
+import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.androidx.viewmodel.scope.emptyState
+
+class IndicatorsFragment : Fragment() {
+
+    private val viewModel: IndicatorsViewModel by viewModel(state = emptyState())
+    private lateinit var binding: FragmentIndicatorsBinding
+    private lateinit var indicatorsAdapter: IndicatorsAdapter
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        binding = FragmentIndicatorsBinding
+            .inflate(inflater, container, false)
+
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        setupViews()
+        observeState()
+        observeEvents()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.fetchIndicators()
+    }
+
+    private fun setupViews() {
+        indicatorsAdapter = IndicatorsAdapter { viewModel.onIndicatorClicked(it) }
+
+        binding.listIndicators.apply {
+            adapter = indicatorsAdapter
+            addItemDecoration(DividerItemDecoration(requireContext(), LinearLayoutManager.VERTICAL))
+        }
+
+        binding.buttonLogOut.setOnClickListener {
+            viewModel.onLogoutClicked()
+        }
+    }
+
+    private fun observeState() {
+        viewModel.isLoading.observe(viewLifecycleOwner, { loading ->
+            binding.refreshIndicators.isRefreshing = loading
+        })
+
+        viewModel.items.observe(viewLifecycleOwner, { items ->
+            indicatorsAdapter.submitList(items)
+        })
+    }
+
+    private fun observeEvents() {
+        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+            viewModel.events.collect { event ->
+                when (event) {
+                    is IndicatorsViewModel.Event.Failure -> {
+                        Snackbar.make(
+                            requireView(),
+                            "Oops, ha ocurrido un error",
+                            Snackbar.LENGTH_INDEFINITE
+                        ).setAction("Reintentar") {
+                            event.onRetry.invoke()
+                        }.show()
+                    }
+                    IndicatorsViewModel.Event.Logout -> {
+                        findNavController().navigate(
+                            IndicatorsFragmentDirections.actionIndicatorsToLogin()
+                        )
+                    }
+                    is IndicatorsViewModel.Event.NavigateToDetails -> {
+                        findNavController().navigate(
+                            IndicatorsFragmentDirections
+                                .actionIndicatorsToIndicatorDetails(event.indicator)
+                        )
+                    }
+                }
+            }
+        }
+    }
+}

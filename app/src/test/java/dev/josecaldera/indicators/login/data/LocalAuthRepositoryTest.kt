@@ -6,18 +6,17 @@ import dev.josecaldera.indicators.login.data.session.SessionStorage
 import dev.josecaldera.indicators.login.domain.AuthRepository
 import dev.josecaldera.indicators.login.domain.model.AuthError
 import dev.josecaldera.indicators.login.domain.model.User
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.spyk
-import io.mockk.verify
+import io.mockk.*
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class LocalAuthRepositoryTest {
 
     // we can use mocks for testing
