@@ -5,6 +5,7 @@ import dev.josecaldera.indicators.args.IndicatorArg
 import dev.josecaldera.indicators.args.toParcelable
 import dev.josecaldera.indicators.core.Error
 import dev.josecaldera.indicators.core.Result
+import dev.josecaldera.indicators.login.data.session.SessionStorage
 import dev.josecaldera.indicators.login.domain.AuthRepository
 import dev.josecaldera.indicators.main.domain.IndicatorsRepository
 import dev.josecaldera.indicators.main.domain.model.Indicator
@@ -17,7 +18,8 @@ import kotlinx.coroutines.launch
 class IndicatorsViewModel(
     private val savedStateHandle: SavedStateHandle,
     private val indicatorsRepository: IndicatorsRepository,
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val sessionStorage: SessionStorage
 ) : ViewModel() {
 
     private val uiEvents = BroadcastChannel<Event>(Channel.BUFFERED)
@@ -28,6 +30,9 @@ class IndicatorsViewModel(
 
     private val _loading: MutableLiveData<Boolean> = MutableLiveData(false)
     val isLoading: LiveData<Boolean> = _loading
+
+    val userName = sessionStorage.getUser().getOrNull()?.name
+        ?: throw IllegalStateException("Indicators can't be shown to a logged out user")
 
     fun onIndicatorClicked(indicator: Indicator) {
         sendEvent(Event.NavigateToDetails(indicator.toParcelable()))

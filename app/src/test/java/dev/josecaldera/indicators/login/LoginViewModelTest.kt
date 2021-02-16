@@ -126,6 +126,30 @@ class LoginViewModelTest {
         }
 
     @Test
+    fun `GIVEN valid credentials WHEN onLoginClicked THEN send HideSoftkeyboard event`() =
+        coroutinesTestRule.runBlockingTest {
+            createViewModel().whileObserving {
+                email.value = "email@email.com"
+                password.value = "123456"
+
+                val eventList = mutableListOf<LoginViewModel.Event>()
+
+                val job = launch(coroutineContext) {
+                    events.collect {
+                        eventList.add(it)
+                    }
+                }
+
+                onLoginClicked()
+
+                assertTrue(eventList.isNotEmpty())
+                assertEquals(LoginViewModel.Event.HideSoftKeyboard, eventList.first())
+
+                job.cancel()
+            }
+        }
+
+    @Test
     fun `GIVEN login request WHEN success THEN send LoginSuccess event`() =
         coroutinesTestRule.runBlockingTest {
             createViewModel().whileObserving {
@@ -146,7 +170,7 @@ class LoginViewModelTest {
                 onLoginClicked()
 
                 assertTrue(eventList.isNotEmpty())
-                val event = eventList.first() as LoginViewModel.Event.LoginSuccess
+                val event = eventList[1] as LoginViewModel.Event.LoginSuccess
                 assertEquals(user, event.user)
 
                 job.cancel()
@@ -173,7 +197,7 @@ class LoginViewModelTest {
                 onLoginClicked()
 
                 assertTrue(eventList.isNotEmpty())
-                assertTrue(eventList.first() is LoginViewModel.Event.LoginError)
+                assertTrue(eventList[1] is LoginViewModel.Event.LoginError)
 
                 job.cancel()
             }

@@ -11,13 +11,16 @@ import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dev.josecaldera.indicators.R
 import dev.josecaldera.indicators.databinding.FragmentLoginBinding
+import dev.josecaldera.indicators.toolbar.ToolbarViewModel
 import dev.josecaldera.indicators.utils.hideSoftKeyboard
 import kotlinx.coroutines.flow.collect
+import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.androidx.viewmodel.scope.emptyState
 
 class LoginFragment : Fragment() {
 
+    private val toolbarViewModel: ToolbarViewModel by sharedViewModel()
     private val viewModel: LoginViewModel by viewModel(state = emptyState())
     private lateinit var binding: FragmentLoginBinding
 
@@ -57,6 +60,8 @@ class LoginFragment : Fragment() {
         binding.buttonLogIn.setOnClickListener {
             viewModel.onLoginClicked()
         }
+
+        toolbarViewModel.hide()
     }
 
     private fun observeState() {
@@ -95,8 +100,8 @@ class LoginFragment : Fragment() {
                     LoginViewModel.Event.LoginError -> {
                         // For demo purposes, let's show a simple dialog
                         MaterialAlertDialogBuilder(requireContext())
-                            .setTitle("Oops, algo salio mal")
-                            .setMessage("Tus datos son incorrectos. Intenta nuevamente.")
+                            .setTitle(R.string.error_message)
+                            .setMessage(R.string.error_invalid_credentials)
                             .setPositiveButton(android.R.string.ok) { dialog, _ ->
                                 dialog.dismiss()
                             }

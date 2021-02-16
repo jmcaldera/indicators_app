@@ -3,12 +3,31 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/destination_indicators">
+    app:startDestination="@id/destination_landing">
+
+    <fragment
+        android:id="@+id/destination_landing"
+        android:name="dev.josecaldera.indicators.landing.LandingFragment"
+        android:label="Landing"
+        tools:layout="@layout/fragment_landing">
+
+        <action
+            android:id="@+id/action_landing_to_indicators"
+            app:destination="@id/destination_indicators"
+            app:popUpTo="@id/destination_landing"
+            app:popUpToInclusive="true" />
+
+        <action
+            android:id="@+id/action_landing_to_login"
+            app:destination="@id/destination_login"
+            app:popUpTo="@id/destination_landing"
+            app:popUpToInclusive="true" />
+    </fragment>
 
     <fragment
         android:id="@+id/destination_indicators"
         android:name="dev.josecaldera.indicators.main.ui.IndicatorsFragment"
-        android:label="Indicadores"
+        android:label="@string/title_indicators"
         tools:layout="@layout/fragment_indicators">
 
         <action
@@ -18,7 +37,7 @@
         <action
             android:id="@+id/action_indicators_to_login"
             app:destination="@id/destination_login"
-            app:popUpTo="@id/destination_login"
+            app:popUpTo="@id/destination_indicators"
             app:popUpToInclusive="true" />
 
     </fragment>
@@ -26,20 +45,20 @@
     <fragment
         android:id="@+id/destination_login"
         android:name="dev.josecaldera.indicators.login.ui.LoginFragment"
-        android:label="Inicia Sesión"
+        android:label="@string/title_login"
         tools:layout="@layout/fragment_login">
 
         <action
             android:id="@+id/action_login_to_indicators"
             app:destination="@id/destination_indicators"
-            app:popUpTo="@id/destination_indicators"
+            app:popUpTo="@id/destination_login"
             app:popUpToInclusive="true" />
     </fragment>
 
     <fragment
         android:id="@+id/destination_indicator_details"
         android:name="dev.josecaldera.indicators.details.IndicatorDetailsFragment"
-        android:label="Detalles"
+        android:label="@string/title_indicator_details"
         tools:layout="@layout/fragment_indicator_details">
 
         <argument

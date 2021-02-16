@@ -2,6 +2,7 @@ package dev.josecaldera.indicators.di
 
 import com.squareup.moshi.Moshi
 import dev.josecaldera.indicators.details.IndicatorDetailsViewModel
+import dev.josecaldera.indicators.landing.LandingViewModel
 import dev.josecaldera.indicators.login.data.LocalAuthRepository
 import dev.josecaldera.indicators.login.data.api.AuthApi
 import dev.josecaldera.indicators.login.data.api.SecureUserStorage
@@ -17,6 +18,7 @@ import dev.josecaldera.indicators.main.domain.IndicatorsRepository
 import dev.josecaldera.indicators.storage.SecureStorageFactory
 import dev.josecaldera.indicators.storage.Storage
 import dev.josecaldera.indicators.main.ui.IndicatorsViewModel
+import dev.josecaldera.indicators.toolbar.ToolbarViewModel
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.android.ext.koin.androidContext
@@ -30,9 +32,11 @@ private const val BASE_URL = "https://www.mindicador.cl"
 val applicationModule = module {
 
     // ViewModels
+    viewModel { LandingViewModel(get()) }
     viewModel { LoginViewModel(get(), get()) }
-    viewModel { IndicatorsViewModel(get(), get(), get()) }
+    viewModel { IndicatorsViewModel(get(), get(), get(), get()) }
     viewModel { IndicatorDetailsViewModel(get()) }
+    viewModel { ToolbarViewModel() }
 
     // Storage
     factory<Storage.Factory> { SecureStorageFactory(androidContext()) }

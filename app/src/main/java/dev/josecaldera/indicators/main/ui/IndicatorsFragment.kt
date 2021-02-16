@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -16,12 +17,15 @@ import dev.josecaldera.indicators.args.toParcelable
 import dev.josecaldera.indicators.databinding.FragmentIndicatorsBinding
 import dev.josecaldera.indicators.details.IndicatorDetailsFragment
 import dev.josecaldera.indicators.main.ui.adapter.IndicatorsAdapter
+import dev.josecaldera.indicators.toolbar.ToolbarViewModel
 import kotlinx.coroutines.flow.collect
+import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.androidx.viewmodel.scope.emptyState
 
 class IndicatorsFragment : Fragment() {
 
+    private val toolbarViewModel: ToolbarViewModel by sharedViewModel()
     private val viewModel: IndicatorsViewModel by viewModel(state = emptyState())
     private lateinit var binding: FragmentIndicatorsBinding
     private lateinit var indicatorsAdapter: IndicatorsAdapter
@@ -60,6 +64,9 @@ class IndicatorsFragment : Fragment() {
         binding.buttonLogOut.setOnClickListener {
             viewModel.onLogoutClicked()
         }
+
+        toolbarViewModel.setTitle(getString(R.string.title_indicators, viewModel.userName))
+        toolbarViewModel.show()
     }
 
     private fun observeState() {
@@ -79,9 +86,9 @@ class IndicatorsFragment : Fragment() {
                     is IndicatorsViewModel.Event.Failure -> {
                         Snackbar.make(
                             requireView(),
-                            "Oops, ha ocurrido un error",
+                            R.string.error_message,
                             Snackbar.LENGTH_INDEFINITE
-                        ).setAction("Reintentar") {
+                        ).setAction(R.string.button_retry) {
                             event.onRetry.invoke()
                         }.show()
                     }

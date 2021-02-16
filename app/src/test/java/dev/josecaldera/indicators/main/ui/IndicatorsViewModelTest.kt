@@ -6,17 +6,18 @@ import androidx.lifecycle.SavedStateHandle
 import dev.josecaldera.indicators.args.toParcelable
 import dev.josecaldera.indicators.core.Result
 import dev.josecaldera.indicators.login.domain.AuthRepository
+import dev.josecaldera.indicators.login.domain.model.User
 import dev.josecaldera.indicators.main.domain.IndicatorsRepository
 import dev.josecaldera.indicators.main.domain.model.Indicator
 import dev.josecaldera.indicators.main.domain.model.IndicatorsError
 import dev.josecaldera.indicators.utils.CoroutinesTestRule
-import io.mockk.coEvery
-import io.mockk.coVerify
-import io.mockk.mockk
+import dev.josecaldera.indicators.utils.FakeSessionStorage
+import io.mockk.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runBlockingTest
+import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -36,9 +37,16 @@ class IndicatorsViewModelTest {
 
     private val authRepository = mockk<AuthRepository>(relaxed = true)
     private val indicatorsRepository = mockk<IndicatorsRepository>(relaxed = true)
+    private val sessionStorage = spyk(FakeSessionStorage())
 
     @Before
     fun setUp() {
+        sessionStorage.saveUser(User("name", "email"))
+    }
+
+    @After
+    fun tearDown() {
+        sessionStorage.clear()
     }
 
     @Test
@@ -184,13 +192,29 @@ class IndicatorsViewModelTest {
             }
         }
 
+    @Test
+    fun `GIVEN viewModel WHEN init THEN get user session`() {
+        createViewModel().whileObserving {
+            verify { sessionStorage.getUser() }
+        }
+    }
+
+    @Test(expected = IllegalStateException::class)
+    fun `GIVEN empty user session WHEN init THEN throw exception`() {
+        sessionStorage.clear()
+        createViewModel().whileObserving {
+            verify { sessionStorage.getUser() }
+        }
+    }
+
     private fun createViewModel(
         savedStateHandle: SavedStateHandle = SavedStateHandle()
     ): IndicatorsViewModel {
         return IndicatorsViewModel(
             savedStateHandle,
             indicatorsRepository,
-            authRepository
+            authRepository,
+            sessionStorage
         )
     }
 

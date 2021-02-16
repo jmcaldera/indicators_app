@@ -54,6 +54,7 @@ class LoginViewModel(
         // view can only call this method if email and password are valid
         viewModelScope.launch {
             _loading.value = true
+            sendEvent(Event.HideSoftKeyboard)
 
             val result = authRepository.logIn(
                 request = AuthRepository.AuthRequest(
