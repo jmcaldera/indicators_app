@@ -4,8 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -13,9 +11,7 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.snackbar.Snackbar
 import dev.josecaldera.indicators.R
-import dev.josecaldera.indicators.args.toParcelable
 import dev.josecaldera.indicators.databinding.FragmentIndicatorsBinding
-import dev.josecaldera.indicators.details.IndicatorDetailsFragment
 import dev.josecaldera.indicators.main.ui.adapter.IndicatorsAdapter
 import dev.josecaldera.indicators.toolbar.ToolbarViewModel
 import kotlinx.coroutines.flow.collect
@@ -54,15 +50,11 @@ class IndicatorsFragment : Fragment() {
     }
 
     private fun setupViews() {
-        indicatorsAdapter = IndicatorsAdapter { viewModel.onIndicatorClicked(it) }
+        indicatorsAdapter = IndicatorsAdapter()
 
         binding.listIndicators.apply {
             adapter = indicatorsAdapter
             addItemDecoration(DividerItemDecoration(requireContext(), LinearLayoutManager.VERTICAL))
-        }
-
-        binding.buttonLogOut.setOnClickListener {
-            viewModel.onLogoutClicked()
         }
 
         toolbarViewModel.setTitle(getString(R.string.title_indicators, viewModel.userName))

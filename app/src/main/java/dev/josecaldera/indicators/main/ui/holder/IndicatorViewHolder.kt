@@ -2,18 +2,17 @@ package dev.josecaldera.indicators.main.ui.holder
 
 import androidx.recyclerview.widget.RecyclerView
 import dev.josecaldera.indicators.databinding.LayoutItemIndicatorBinding
-import dev.josecaldera.indicators.main.domain.model.Indicator
+import dev.josecaldera.indicators.main.ui.IndicatorItem
 
 class IndicatorViewHolder(
-    private val binding: LayoutItemIndicatorBinding,
-    private val onClick: (Indicator) -> Unit
+    private val binding: LayoutItemIndicatorBinding
 ) : RecyclerView.ViewHolder(binding.root) {
 
-    fun bind(indicator: Indicator) {
+    fun bind(item: IndicatorItem) {
         binding.root.setOnClickListener {
-            onClick.invoke(indicator)
+            item.onClick.invoke(item.indicator)
         }
-        binding.name.text = indicator.name
-        binding.value.text = indicator.value
+        binding.name.text = item.indicator.name
+        binding.value.text = item.indicator.value
     }
 }

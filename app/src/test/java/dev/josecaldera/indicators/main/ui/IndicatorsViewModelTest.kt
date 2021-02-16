@@ -10,6 +10,7 @@ import dev.josecaldera.indicators.login.domain.model.User
 import dev.josecaldera.indicators.main.domain.IndicatorsRepository
 import dev.josecaldera.indicators.main.domain.model.Indicator
 import dev.josecaldera.indicators.main.domain.model.IndicatorsError
+import dev.josecaldera.indicators.main.ui.adapter.RecyclerViewItem
 import dev.josecaldera.indicators.utils.CoroutinesTestRule
 import dev.josecaldera.indicators.utils.FakeSessionStorage
 import io.mockk.*
@@ -67,7 +68,7 @@ class IndicatorsViewModelTest {
 
             fetchIndicators()
 
-            assertEquals(listOf(indicator), items.value)
+            assertEquals(2, items.value?.size)
         }
     }
 
@@ -130,7 +131,7 @@ class IndicatorsViewModelTest {
         }
 
     @Test
-    fun `GIVEN indicator call WHEN onIndicatorClicked THEN send NavigateToDetails event`() =
+    fun `GIVEN indicator item WHEN onIndicatorClicked THEN send NavigateToDetails event`() =
         coroutinesTestRule.runBlockingTest {
             val indicator = fakeIndicator()
             coEvery { indicatorsRepository.getIndicators() } returns
@@ -146,7 +147,11 @@ class IndicatorsViewModelTest {
                     }
                 }
 
-                onIndicatorClicked(indicator)
+                fetchIndicators()
+
+                items.value?.first()?.let {
+                    (it as IndicatorItem).onClick.invoke(it.indicator)
+                }
 
                 assertTrue(eventList.isNotEmpty())
                 val event = eventList.first() as IndicatorsViewModel.Event.NavigateToDetails
@@ -161,9 +166,17 @@ class IndicatorsViewModelTest {
     fun `GIVEN viewModel WHEN onLogoutClicked THEN call repository`() =
         coroutinesTestRule.runBlockingTest {
 
+            val indicator = fakeIndicator()
+            coEvery { indicatorsRepository.getIndicators() } returns
+                    Result.OnSuccess(listOf(indicator))
+
             createViewModel().whileObserving {
 
-                onLogoutClicked()
+                fetchIndicators()
+
+                items.value?.last()?.let {
+                    (it as LogoutItem).onClick.invoke()
+                }
 
                 coVerify { authRepository.logOut() }
             }
@@ -172,6 +185,10 @@ class IndicatorsViewModelTest {
     @Test
     fun `GIVEN viewModel WHEN onLogoutClicked THEN send Logout event`() =
         coroutinesTestRule.runBlockingTest {
+
+            val indicator = fakeIndicator()
+            coEvery { indicatorsRepository.getIndicators() } returns
+                    Result.OnSuccess(listOf(indicator))
 
             createViewModel().whileObserving {
 
@@ -183,7 +200,11 @@ class IndicatorsViewModelTest {
                     }
                 }
 
-                onLogoutClicked()
+                fetchIndicators()
+
+                items.value?.last()?.let {
+                    (it as LogoutItem).onClick.invoke()
+                }
 
                 assertTrue(eventList.isNotEmpty())
                 assertTrue(eventList.first() is IndicatorsViewModel.Event.Logout)
@@ -219,9 +240,8 @@ class IndicatorsViewModelTest {
     }
 
     private fun IndicatorsViewModel.whileObserving(block: IndicatorsViewModel.() -> Unit) {
-        val itemsObserver: Observer<List<Indicator>> = Observer { }
+        val itemsObserver: Observer<List<RecyclerViewItem>> = Observer { }
         val booleanObserver: Observer<Boolean> = Observer { }
-
 
         items.observeForever(itemsObserver)
         isLoading.observeForever(booleanObserver)
