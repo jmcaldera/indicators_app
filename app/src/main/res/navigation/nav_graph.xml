@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/destination_login">
+
+    <fragment
+        android:id="@+id/destination_indicators"
+        android:name="dev.josecaldera.indicators.ui.IndicatorsFragment"
+        android:label="Indicadores"
+        tools:layout="@layout/fragment_indicators">
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/destination_login"
+        android:name="dev.josecaldera.indicators.login.ui.LoginFragment"
+        android:label="Inicia Sesión"
+        tools:layout="@layout/fragment_login">
+
+        <action
+            android:id="@+id/action_login_to_indicators"
+            app:destination="@id/destination_indicators"
+            app:popUpTo="@id/destination_indicators"
+            app:popUpToInclusive="true" />
+    </fragment>
+</navigation>
