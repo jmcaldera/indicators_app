@@ -16,9 +16,9 @@ class LandingViewModel(
     val events: Flow<Event> = uiEvents.asFlow()
 
     fun checkUserStatus() {
-        when (sessionStorage.getUser()) {
+        when (val result = sessionStorage.getUser()) {
             is Result.OnError -> sendEvent(Event.NavigateToLogin)
-            is Result.OnSuccess -> sendEvent(Event.NavigateToIndicators)
+            is Result.OnSuccess -> sendEvent(Event.NavigateToIndicators(result.data.name))
         }
     }
 
@@ -28,6 +28,6 @@ class LandingViewModel(
 
     sealed class Event {
         object NavigateToLogin : Event()
-        object NavigateToIndicators : Event()
+        class NavigateToIndicators(val name: String) : Event()
     }
 }

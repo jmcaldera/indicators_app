@@ -34,7 +34,7 @@ val applicationModule = module {
     // ViewModels
     viewModel { LandingViewModel(get()) }
     viewModel { LoginViewModel(get(), get()) }
-    viewModel { IndicatorsViewModel(get(), get(), get(), get()) }
+    viewModel { IndicatorsViewModel(get(), get(), get()) }
     viewModel { IndicatorDetailsViewModel(get()) }
     viewModel { ToolbarViewModel() }
 
@@ -57,7 +57,7 @@ val applicationModule = module {
     single<IndicatorsRepository> { IndicatorsRepositoryImpl(get()) }
 }
 
-fun provideOkHttpClient(): OkHttpClient {
+private fun provideOkHttpClient(): OkHttpClient {
     return OkHttpClient.Builder()
         .addInterceptor(HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
@@ -65,13 +65,13 @@ fun provideOkHttpClient(): OkHttpClient {
         .build()
 }
 
-fun provideMoshi(): Moshi {
+private fun provideMoshi(): Moshi {
     return Moshi.Builder()
         .addLast(IndicatorsJsonAdapter())
         .build()
 }
 
-fun provideRetrofit(
+private fun provideRetrofit(
     client: OkHttpClient,
     moshi: Moshi
 ): Retrofit {
@@ -82,6 +82,6 @@ fun provideRetrofit(
         .build()
 }
 
-fun createIndicatorsApi(retrofit: Retrofit): IndicatorsApi {
+private fun createIndicatorsApi(retrofit: Retrofit): IndicatorsApi {
     return retrofit.create(IndicatorsApi::class.java)
 }

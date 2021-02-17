@@ -108,7 +108,9 @@ class LoginFragment : Fragment() {
                             .show()
                     }
                     is LoginViewModel.Event.LoginSuccess -> {
-                        findNavController().navigate(R.id.action_login_to_indicators)
+                        findNavController().navigate(
+                            LoginFragmentDirections.actionLoginToIndicators(event.user.name)
+                        )
                     }
                 }
             }

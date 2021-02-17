@@ -1,5 +1,6 @@
 package dev.josecaldera.indicators.main.data
 
+import dev.josecaldera.indicators.core.Result
 import dev.josecaldera.indicators.main.data.api.IndicatorsApi
 import dev.josecaldera.indicators.main.data.api.NetworkIndicator
 import dev.josecaldera.indicators.main.data.api.toDomain
@@ -61,5 +62,40 @@ class IndicatorsRepositoryImplTest {
 
         assertTrue(result.isNotEmpty())
         assertEquals(indicator.toDomain(), result.first())
+    }
+
+    @Test
+    fun `GIVEN cached data WHEN get for code non empty THEN return filtered list`() = runBlockingTest {
+        val indicator = NetworkIndicator(
+            "code", "name", "unit", "date", "value"
+        )
+
+        coEvery { api.getIndicators() } returns listOf(indicator, indicator.copy(code = "dolar"))
+
+        repository.getIndicators() // cache
+
+        val result = repository.getIndicatorsForCode("do")
+
+        assertTrue(result.isSuccess())
+        val data = (result as Result.OnSuccess).data
+        assertEquals(1, data.size)
+        assertEquals(indicator.copy(code = "dolar").toDomain(), data.first())
+    }
+
+    @Test
+    fun `GIVEN cached data WHEN get for code empty THEN return full list`() = runBlockingTest {
+        val indicator = NetworkIndicator(
+            "code", "name", "unit", "date", "value"
+        )
+
+        coEvery { api.getIndicators() } returns listOf(indicator, indicator.copy(code = "dolar"))
+
+        repository.getIndicators() // cache
+
+        val result = repository.getIndicatorsForCode("")
+
+        assertTrue(result.isSuccess())
+        val data = (result as Result.OnSuccess).data
+        assertEquals(2, data.size)
     }
 }

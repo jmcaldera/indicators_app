@@ -1,9 +1,10 @@
 package dev.josecaldera.indicators.main.ui
 
+import android.app.SearchManager
+import android.content.Context
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
+import android.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -14,6 +15,7 @@ import dev.josecaldera.indicators.R
 import dev.josecaldera.indicators.databinding.FragmentIndicatorsBinding
 import dev.josecaldera.indicators.main.ui.adapter.IndicatorsAdapter
 import dev.josecaldera.indicators.toolbar.ToolbarViewModel
+import dev.josecaldera.indicators.utils.hideSoftKeyboard
 import kotlinx.coroutines.flow.collect
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -34,6 +36,7 @@ class IndicatorsFragment : Fragment() {
         binding = FragmentIndicatorsBinding
             .inflate(inflater, container, false)
 
+        setHasOptionsMenu(true)
         return binding.root
     }
 
@@ -42,11 +45,10 @@ class IndicatorsFragment : Fragment() {
         setupViews()
         observeState()
         observeEvents()
-    }
 
-    override fun onResume() {
-        super.onResume()
-        viewModel.fetchIndicators()
+        if (savedInstanceState == null) {
+            viewModel.fetchIndicators()
+        }
     }
 
     private fun setupViews() {
@@ -57,7 +59,6 @@ class IndicatorsFragment : Fragment() {
             addItemDecoration(DividerItemDecoration(requireContext(), LinearLayoutManager.VERTICAL))
         }
 
-        toolbarViewModel.setTitle(getString(R.string.title_indicators, viewModel.userName))
         toolbarViewModel.show()
     }
 
@@ -95,7 +96,54 @@ class IndicatorsFragment : Fragment() {
                                 .actionIndicatorsToIndicatorDetails(event.indicator)
                         )
                     }
+                    IndicatorsViewModel.Event.HideSoftKeyboard -> hideSoftKeyboard()
                 }
+            }
+        }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.menu_indicators, menu)
+        super.onCreateOptionsMenu(menu, inflater)
+    }
+
+    override fun onPrepareOptionsMenu(menu: Menu) {
+        super.onPrepareOptionsMenu(menu)
+        val item = menu.findItem(R.id.action_search)
+
+        val searchManager = requireActivity()
+            .getSystemService(Context.SEARCH_SERVICE) as SearchManager
+
+        if (item != null) {
+            (item.actionView as? SearchView)?.let { actionView ->
+
+                viewModel.savedQuery.observe(viewLifecycleOwner, { saved ->
+
+                    // Restore previously saved query on view recreation
+                    val query = actionView.query.toString()
+                    if (!saved.isNullOrBlank() && query != saved) {
+                        actionView.setQuery(saved, false)
+
+                        // Expand searchView
+                        actionView.isIconified = false
+                    }
+                })
+
+                actionView.setSearchableInfo(
+                    searchManager.getSearchableInfo(requireActivity().componentName)
+                )
+
+                actionView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+                    override fun onQueryTextSubmit(query: String): Boolean {
+                        viewModel.onQuerySubmitted(query)
+                        return true
+                    }
+
+                    override fun onQueryTextChange(newText: String): Boolean {
+                        viewModel.onQueryChanged(newText)
+                        return true
+                    }
+                })
             }
         }
     }

@@ -52,8 +52,8 @@ class LandingFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {
             viewModel.events.collect { event ->
                 when (event) {
-                    Event.NavigateToIndicators -> findNavController()
-                        .navigate(LandingFragmentDirections.actionLandingToIndicators())
+                    is Event.NavigateToIndicators -> findNavController()
+                        .navigate(LandingFragmentDirections.actionLandingToIndicators(event.name))
                     Event.NavigateToLogin -> findNavController()
                         .navigate(LandingFragmentDirections.actionLandingToLogin())
                 }

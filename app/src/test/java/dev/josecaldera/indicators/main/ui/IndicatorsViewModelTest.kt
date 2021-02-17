@@ -6,13 +6,11 @@ import androidx.lifecycle.SavedStateHandle
 import dev.josecaldera.indicators.args.toParcelable
 import dev.josecaldera.indicators.core.Result
 import dev.josecaldera.indicators.login.domain.AuthRepository
-import dev.josecaldera.indicators.login.domain.model.User
 import dev.josecaldera.indicators.main.domain.IndicatorsRepository
 import dev.josecaldera.indicators.main.domain.model.Indicator
 import dev.josecaldera.indicators.main.domain.model.IndicatorsError
 import dev.josecaldera.indicators.main.ui.adapter.RecyclerViewItem
 import dev.josecaldera.indicators.utils.CoroutinesTestRule
-import dev.josecaldera.indicators.utils.FakeSessionStorage
 import io.mockk.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collect
@@ -38,16 +36,15 @@ class IndicatorsViewModelTest {
 
     private val authRepository = mockk<AuthRepository>(relaxed = true)
     private val indicatorsRepository = mockk<IndicatorsRepository>(relaxed = true)
-    private val sessionStorage = spyk(FakeSessionStorage())
 
     @Before
     fun setUp() {
-        sessionStorage.saveUser(User("name", "email"))
+
     }
 
     @After
     fun tearDown() {
-        sessionStorage.clear()
+
     }
 
     @Test
@@ -214,19 +211,78 @@ class IndicatorsViewModelTest {
         }
 
     @Test
-    fun `GIVEN viewModel WHEN init THEN get user session`() {
-        createViewModel().whileObserving {
-            verify { sessionStorage.getUser() }
-        }
-    }
+    fun `GIVEN query WHEN onQueryChanged THEN call getIndicatorsForCode`() =
+        coroutinesTestRule.runBlockingTest {
 
-    @Test(expected = IllegalStateException::class)
-    fun `GIVEN empty user session WHEN init THEN throw exception`() {
-        sessionStorage.clear()
-        createViewModel().whileObserving {
-            verify { sessionStorage.getUser() }
+            val indicator = fakeIndicator()
+            coEvery { indicatorsRepository.getIndicators() } returns
+                    Result.OnSuccess(listOf(indicator))
+
+            coEvery { indicatorsRepository.getIndicatorsForCode(any()) } returns
+                    Result.OnSuccess(listOf(indicator))
+
+            createViewModel().whileObserving {
+
+                onQueryChanged("query")
+
+                advanceUntilIdle() // skip debounce delay
+
+                coVerify { indicatorsRepository.getIndicatorsForCode("query") }
+            }
         }
-    }
+
+    @Test
+    fun `GIVEN query WHEN onQuerySubmitted THEN call getIndicatorsForCode`() =
+        coroutinesTestRule.runBlockingTest {
+
+            val indicator = fakeIndicator()
+            coEvery { indicatorsRepository.getIndicators() } returns
+                    Result.OnSuccess(listOf(indicator))
+
+            coEvery { indicatorsRepository.getIndicatorsForCode(any()) } returns
+                    Result.OnSuccess(listOf(indicator))
+
+            createViewModel().whileObserving {
+
+                onQuerySubmitted("query")
+
+                advanceUntilIdle() // skip debounce delay
+
+                coVerify { indicatorsRepository.getIndicatorsForCode("query") }
+            }
+        }
+
+    @Test
+    fun `GIVEN query WHEN onQuerySubmitted THEN send HideSoftKeyboard event`() =
+        coroutinesTestRule.runBlockingTest {
+
+            val indicator = fakeIndicator()
+            coEvery { indicatorsRepository.getIndicators() } returns
+                    Result.OnSuccess(listOf(indicator))
+
+            coEvery { indicatorsRepository.getIndicatorsForCode(any()) } returns
+                    Result.OnSuccess(listOf(indicator))
+
+            createViewModel().whileObserving {
+
+                val eventList = mutableListOf<IndicatorsViewModel.Event>()
+
+                val job = launch(coroutineContext) {
+                    events.collect {
+                        eventList.add(it)
+                    }
+                }
+
+                onQuerySubmitted("query")
+
+                advanceUntilIdle() // skip debounce delay
+
+                assertTrue(eventList.isNotEmpty())
+                assertTrue(eventList.first() is IndicatorsViewModel.Event.HideSoftKeyboard)
+
+                job.cancel()
+            }
+        }
 
     private fun createViewModel(
         savedStateHandle: SavedStateHandle = SavedStateHandle()
@@ -234,8 +290,7 @@ class IndicatorsViewModelTest {
         return IndicatorsViewModel(
             savedStateHandle,
             indicatorsRepository,
-            authRepository,
-            sessionStorage
+            authRepository
         )
     }
 

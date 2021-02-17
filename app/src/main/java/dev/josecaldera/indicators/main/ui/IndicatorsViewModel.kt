@@ -5,38 +5,69 @@ import dev.josecaldera.indicators.args.IndicatorArg
 import dev.josecaldera.indicators.args.toParcelable
 import dev.josecaldera.indicators.core.Error
 import dev.josecaldera.indicators.core.Result
-import dev.josecaldera.indicators.login.data.session.SessionStorage
 import dev.josecaldera.indicators.login.domain.AuthRepository
 import dev.josecaldera.indicators.main.domain.IndicatorsRepository
 import dev.josecaldera.indicators.main.domain.model.Indicator
 import dev.josecaldera.indicators.main.ui.adapter.RecyclerViewItem
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 class IndicatorsViewModel(
     private val savedStateHandle: SavedStateHandle,
     private val indicatorsRepository: IndicatorsRepository,
-    private val authRepository: AuthRepository,
-    private val sessionStorage: SessionStorage
+    private val authRepository: AuthRepository
 ) : ViewModel() {
+
+    companion object {
+        private const val ARG_QUERY = "ARG_QUERY"
+    }
 
     private val uiEvents = BroadcastChannel<Event>(Channel.BUFFERED)
     val events: Flow<Event> = uiEvents.asFlow()
 
-    private val _items = MutableLiveData<List<RecyclerViewItem>>(emptyList())
+    private val inputs = BroadcastChannel<SearchEvent>(Channel.BUFFERED)
+
+    private val _items = MutableLiveData<List<RecyclerViewItem>>(
+        listOf(LogoutItem { onLogoutClicked() })
+    )
     val items: LiveData<List<RecyclerViewItem>> = _items
 
     private val _loading: MutableLiveData<Boolean> = MutableLiveData(false)
     val isLoading: LiveData<Boolean> = _loading
 
-    val userName = sessionStorage.getUser().getOrNull()?.name
-        ?: throw IllegalStateException("Indicators can't be shown to a logged out user")
+    val savedQuery = savedStateHandle.getLiveData<String>(ARG_QUERY, null)
+
+    init {
+        inputs
+            .asFlow()
+            .debounce(500)
+            .onEach { event ->
+                when (event) {
+                    is SearchEvent.OnQueryTextChange -> {
+                        fetIndicatorsForCode(event.query)
+                    }
+                    is SearchEvent.OnQueryTextSubmit -> {
+                        fetIndicatorsForCode(event.query)
+
+                        sendEvent(Event.HideSoftKeyboard)
+                    }
+                }
+            }
+            .launchIn(viewModelScope)
+    }
 
     private fun onIndicatorClicked(indicator: Indicator) {
         sendEvent(Event.NavigateToDetails(indicator.toParcelable()))
+    }
+
+    fun onQueryChanged(query: String) {
+        inputs.offer(SearchEvent.OnQueryTextChange(query))
+    }
+
+    fun onQuerySubmitted(query: String) {
+        inputs.offer(SearchEvent.OnQueryTextSubmit(query))
     }
 
     private fun onLogoutClicked() {
@@ -47,11 +78,24 @@ class IndicatorsViewModel(
     }
 
     fun fetchIndicators() {
+
+        // we already fetched indicators
+        if (items.value!!.size > 1) return
+
         viewModelScope.launch {
             _loading.value = true
             val result = indicatorsRepository.getIndicators()
 
             _loading.value = false
+            handleResult(result)
+        }
+    }
+
+    private fun fetIndicatorsForCode(query: String) {
+        savedQuery.value = query
+
+        viewModelScope.launch {
+            val result = indicatorsRepository.getIndicatorsForCode(query)
             handleResult(result)
         }
     }
@@ -81,6 +125,12 @@ class IndicatorsViewModel(
         data class NavigateToDetails(val indicator: IndicatorArg) : Event()
         data class Failure(val error: Error, val onRetry: () -> Unit) : Event()
         object Logout : Event()
+        object HideSoftKeyboard : Event()
+    }
+
+    sealed class SearchEvent {
+        class OnQueryTextChange(val query: String) : SearchEvent()
+        class OnQueryTextSubmit(val query: String) : SearchEvent()
     }
 }
 
