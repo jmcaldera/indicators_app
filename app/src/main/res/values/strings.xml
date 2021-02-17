@@ -11,4 +11,6 @@
     <string name="error_invalid_credentials">Tus datos son incorrectos. Intenta nuevamente.</string>
     <string name="button_retry">Reintentar</string>
     <string name="button_logout">Cerrar Sesión</string>
+
+    <string name="indicator_value">%1$s %2$s</string>
 </resources>
