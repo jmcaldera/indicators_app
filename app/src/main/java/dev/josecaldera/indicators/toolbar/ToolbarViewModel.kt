@@ -3,8 +3,11 @@ package dev.josecaldera.indicators.toolbar
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 
-class ToolbarViewModel : ViewModel() {
+@HiltViewModel
+class ToolbarViewModel @Inject constructor() : ViewModel() {
 
     private val visibility = MutableLiveData(true)
     val isVisible: LiveData<Boolean> = visibility

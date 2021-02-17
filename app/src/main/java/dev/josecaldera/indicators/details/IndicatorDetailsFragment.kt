@@ -4,19 +4,15 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
-import androidx.navigation.fragment.navArgs
+import androidx.fragment.app.viewModels
+import dagger.hilt.android.AndroidEntryPoint
 import dev.josecaldera.indicators.databinding.FragmentIndicatorDetailsBinding
-import org.koin.androidx.viewmodel.ext.android.viewModel
 
+@AndroidEntryPoint
 class IndicatorDetailsFragment : Fragment() {
 
-    private val args: IndicatorDetailsFragmentArgs by navArgs()
-
-    private val viewModel: IndicatorDetailsViewModel by viewModel(
-        state = { bundleOf(IndicatorDetailsViewModel.ARG_INDICATOR to args.indicator) }
-    )
+    private val viewModel: IndicatorDetailsViewModel by viewModels()
     private lateinit var binding: FragmentIndicatorDetailsBinding
 
     override fun onCreateView(

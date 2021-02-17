@@ -3,17 +3,20 @@ package dev.josecaldera.indicators.details
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.map
+import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.josecaldera.indicators.args.IndicatorArg
 import dev.josecaldera.indicators.main.domain.model.Indicator
 import java.text.SimpleDateFormat
 import java.util.*
+import javax.inject.Inject
 
-class IndicatorDetailsViewModel(
+@HiltViewModel
+class IndicatorDetailsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
     companion object {
-        const val ARG_INDICATOR = "ARG_INDICATOR"
+        private const val ARG_INDICATOR = "indicator" // match navArgs key
     }
 
     private val _indicator = savedStateHandle.getLiveData<IndicatorArg>(ARG_INDICATOR)

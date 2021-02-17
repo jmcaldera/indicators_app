@@ -5,20 +5,22 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import dagger.hilt.android.AndroidEntryPoint
 import dev.josecaldera.indicators.databinding.FragmentLandingBinding
 import dev.josecaldera.indicators.landing.LandingViewModel.Event
 import dev.josecaldera.indicators.toolbar.ToolbarViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
-import org.koin.androidx.viewmodel.ext.android.sharedViewModel
-import org.koin.androidx.viewmodel.ext.android.viewModel
 
+@AndroidEntryPoint
 class LandingFragment : Fragment() {
 
-    private val toolbarViewModel: ToolbarViewModel by sharedViewModel()
-    private val viewModel: LandingViewModel by viewModel()
+    private val toolbarViewModel: ToolbarViewModel by activityViewModels()
+    private val viewModel: LandingViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,

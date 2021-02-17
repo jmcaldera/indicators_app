@@ -6,22 +6,23 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import dagger.hilt.android.AndroidEntryPoint
 import dev.josecaldera.indicators.R
 import dev.josecaldera.indicators.databinding.FragmentLoginBinding
 import dev.josecaldera.indicators.toolbar.ToolbarViewModel
 import dev.josecaldera.indicators.utils.hideSoftKeyboard
 import kotlinx.coroutines.flow.collect
-import org.koin.androidx.viewmodel.ext.android.sharedViewModel
-import org.koin.androidx.viewmodel.ext.android.viewModel
-import org.koin.androidx.viewmodel.scope.emptyState
 
+@AndroidEntryPoint
 class LoginFragment : Fragment() {
 
-    private val toolbarViewModel: ToolbarViewModel by sharedViewModel()
-    private val viewModel: LoginViewModel by viewModel(state = emptyState())
+    private val toolbarViewModel: ToolbarViewModel by activityViewModels()
+    private val viewModel: LoginViewModel by viewModels()
     private lateinit var binding: FragmentLoginBinding
 
     override fun onCreateView(

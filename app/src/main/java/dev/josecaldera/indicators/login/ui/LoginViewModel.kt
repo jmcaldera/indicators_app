@@ -1,6 +1,7 @@
 package dev.josecaldera.indicators.login.ui
 
 import androidx.lifecycle.*
+import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.josecaldera.indicators.core.Result
 import dev.josecaldera.indicators.login.domain.AuthRepository
 import dev.josecaldera.indicators.login.domain.model.User
@@ -9,8 +10,10 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class LoginViewModel(
+@HiltViewModel
+class LoginViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val authRepository: AuthRepository
 ) : ViewModel() {

@@ -1,17 +1,19 @@
 package dev.josecaldera.indicators
 
 import android.os.Bundle
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
+import dagger.hilt.android.AndroidEntryPoint
 import dev.josecaldera.indicators.databinding.ActivityMainBinding
 import dev.josecaldera.indicators.toolbar.ToolbarViewModel
-import org.koin.androidx.viewmodel.ext.android.viewModel
 
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
-    private val toolbarViewModel: ToolbarViewModel by viewModel()
+    private val toolbarViewModel: ToolbarViewModel by viewModels()
     private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {

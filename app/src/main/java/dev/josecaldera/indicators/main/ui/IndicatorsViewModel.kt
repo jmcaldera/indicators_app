@@ -1,6 +1,7 @@
 package dev.josecaldera.indicators.main.ui
 
 import androidx.lifecycle.*
+import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.josecaldera.indicators.args.IndicatorArg
 import dev.josecaldera.indicators.args.toParcelable
 import dev.josecaldera.indicators.core.Error
@@ -13,8 +14,10 @@ import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class IndicatorsViewModel(
+@HiltViewModel
+class IndicatorsViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val indicatorsRepository: IndicatorsRepository,
     private val authRepository: AuthRepository

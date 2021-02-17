@@ -1,14 +1,17 @@
 package dev.josecaldera.indicators.landing
 
 import androidx.lifecycle.ViewModel
+import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.josecaldera.indicators.core.Result
 import dev.josecaldera.indicators.login.data.session.SessionStorage
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
+import javax.inject.Inject
 
-class LandingViewModel(
+@HiltViewModel
+class LandingViewModel @Inject constructor(
     private val sessionStorage: SessionStorage
 ) : ViewModel() {
 
